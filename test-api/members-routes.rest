@@ -1,0 +1,26 @@
+### Post request to add new member
+POST http://localhost:3000/members
+Content-Type: application/json
+
+{
+    "name": "Luke",
+    "lastname": "Skywalker",
+    "position": "Legend"
+}
+
+
+### Get request to read members
+GET http://localhost:3000/members
+
+### Delete req
+DELETE http://localhost:3000/members/1
+
+### Put req
+PUT http://localhost:3000/members/1
+Content-Type: application/json
+
+{
+    "name":"anakin",
+    "lastname": "skywalker",
+    "position":"Jedai"
+}
