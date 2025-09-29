@@ -1,82 +1,55 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
+
+import apiRoutes from "./api/v.1/members.js";
+import { connectMongo } from "./config/mongo.js";
+
+dotenv.config();
 
 const app = express();
+
 const corsOptions = {
   origin: [
     "http://localhost:5173",
     "http://localhost:5174",
     "http://localhost:5175",
-  ],
+  ], // frontend domain
 };
 
+// Middleware to parse JSON bodies
 app.use(cors(corsOptions));
+
+// Middleware to parse JSON bodies
 app.use(express.json());
 
-//Route 1
-app.get("/", (req, res) => {
-  res.send("Hello Boi, I am your father!");
+app.use("/", apiRoutes);
+
+app.use((req, res, next) => {
+  const error = new Error("Not found...");
+  error.status = 404;
+  next(error);
 });
 
-let members = [];
-
-//Route 2
-app.post("/members", (req, res) => {
-  const { name, lastname, position } = req.body;
-
-  const newMember = {
-    id: String(members.length + 1),
-    name: name,
-    lastname: lastname,
-    position: position,
-  };
-
-  members.push(newMember);
-
-  res.status(201).json(newMember);
+//Centralized error handling middleware
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 });
 
-//Route 3
-app.get("/members", (req, res) => {
-  res.status(200).json(members);
-});
+const PORT = 3001;
 
-//Route 4
-app.delete("/members/:id", (req, res) => {
-  const memberId = req.params.id;
-
-  const memberIndex = members.findIndex((member) => member.id === memberId);
-
-  if (memberIndex !== -1) {
-    members.splice(memberIndex, 1);
-
-    res.status(200).send(`Member with ID ${memberId} delete!`);
-  } else {
-    res.status(404).send("Member not found");
+(async () => {
+  try {
+    await connectMongo();
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT} ✅ 🙌`);
+    });
+  } catch (err) {
+    console.error("Startup error", err);
+    process.exit(1);
   }
-});
-
-//Route 5
-app.put("/members/:id", (req, res) => {
-  const memberId = req.params.id;
-
-  const { name, lastname, position } = req.body;
-
-  const member = members.find((m) => m.id === memberId);
-
-  if (member) {
-    if (name !== undefined) member.name = name;
-    if (lastname !== undefined) member.lastname = lastname;
-    if (position !== undefined) member.position = position;
-
-    res.status(200).json(member);
-  } else {
-    res.status(404).send("Member not found");
-  }
-});
-
-const PORT = 3000;
-
-app.listen(PORT, () => {
-  console.log(`Server walking on port ${PORT}`);
-});
+})();
