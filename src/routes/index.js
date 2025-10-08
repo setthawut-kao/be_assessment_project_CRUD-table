@@ -1,5 +1,5 @@
-import memberRoutes from "./member.routes.js";
+import userRoutes from "./user.route.js";
 
 export default function setupRoutes(app) {
-  app.use("/api/members", memberRoutes);
+  app.use("/api/users", userRoutes);
 }
