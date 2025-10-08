@@ -1,20 +1,20 @@
-import { ReactAssSchema } from "../../../models/ReactAssessment.js";
+import { Member } from "../models/member.model.js";
 
 // createMember
 export const createMember = async (req, res, next) => {
-  const { name, lastname, position } = req.body;
+  const { firstName, lastName, position } = req.body;
 
-  if (!name || !lastname) {
-    const error = new Error("Name, and lastname are required!");
+  if (!firstName || !lastName || !position) {
+    const error = new Error("firstName, lastName, and position are required!");
     error.status = 400;
     return next(error);
   }
 
   try {
-    const member = await ReactAssSchema.create({ name, lastname, position });
+    const member = await Member.create({ firstName, lastName, position });
     res.status(201).json({
-      error: false,
-      member: member,
+      succes: true,
+      data: member,
       message: "Member created successfully!",
     });
   } catch (err) {
@@ -25,10 +25,11 @@ export const createMember = async (req, res, next) => {
 // getMembers
 export const getMembers = async (req, res, next) => {
   try {
-    const members = await ReactAssSchema.find().sort({ createAt: -1 });
+    const members = await Member.find().sort({ createdAt: -1 });
     res.status(200).json({
-      error: false,
-      members: members,
+      succes: true,
+      count: members.length,
+      data: members,
       message: "All members retrieved successfully!",
     });
   } catch (err) {
@@ -40,24 +41,26 @@ export const getMembers = async (req, res, next) => {
 export const editMember = async (req, res, next) => {
   const memberId = req.params.id;
 
-  const { name, lastname, position } = req.body;
+  const { firstName, lastName, position } = req.body;
 
   try {
-    const member = await ReactAssSchema.findOne({ _id: memberId });
+    const member = await Member.findById(memberId);
+
     if (!member) {
-      const error = 404;
+      const error = new Error("Member not found!");
+      error.status = 404;
       return next(error);
     }
 
-    if (name) member.name = name;
-    if (lastname) member.lastname = lastname;
+    if (firstName) member.firstName = firstName;
+    if (lastName) member.lastName = lastName;
     if (position) member.position = position;
 
     await member.save();
 
-    res.status(201).json({
-      error: false,
-      member: member,
+    res.status(200).json({
+      success: true,
+      data: member,
       message: "Member updated successfully!",
     });
   } catch (err) {
@@ -70,16 +73,16 @@ export const deleteMember = async (req, res, next) => {
   const memberId = req.params.id;
 
   try {
-    const member = await ReactAssSchema.findOne({ _id: memberId });
+    const member = await Member.findByIdAndDelete(memberId);
 
     if (!member) {
       const error = new Error("Member not found!");
       error.status = 404;
       return next(error);
     }
-    await ReactAssSchema.deleteOne({ _id: memberId });
+
     res.status(200).json({
-      error: false,
+      success: true,
       message: "Member deleted successfully!",
     });
   } catch (err) {
