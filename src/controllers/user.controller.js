@@ -27,7 +27,7 @@ export const getUsers = async (req, res, next) => {
   try {
     const users = await User.find().sort({ createdAt: -1 });
     res.status(200).json({
-      succes: true,
+      success: true,
       count: users.length,
       data: users,
       message: "All users retrieved successfully!",
