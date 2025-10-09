@@ -10,8 +10,7 @@ const corsOptions = {
   origin: [
     process.env.FRONTEND_URL,
     "http://localhost:5173",
-    "http://localhost:5174",
-    "http://localhost:5175",
+    "https://fe-assessment-project-crud-table.vercel.app",
   ],
   credentials: true,
 };
@@ -40,7 +39,7 @@ app.use((req, res, next) => {
   next(error);
 });
 
-// Error Handler - ต้องอยู่ล่างสุด!
+// Error Handler
 app.use(errorHandler);
 
 export default app;
